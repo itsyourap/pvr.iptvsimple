@@ -55,6 +55,7 @@ namespace iptvsimple
   static const std::string RADIO_MARKER            = "radio=";
   static const std::string PLAYLIST_TYPE_MARKER    = "#EXT-X-PLAYLIST-TYPE:";
   static const std::string WEBPROP_MARKER          = "#WEBPROP:";
+  static const std::string EXTHTTP_MARKER          = "#EXTHTTP:";
 
   class PlaylistLoader
   {
@@ -78,6 +79,7 @@ namespace iptvsimple
   private:
     static std::string ReadMarkerValue(const std::string& line, const std::string& markerName, bool isCheckDelimiters = true);
     static void ParseSinglePropertyIntoChannel(const std::string& line, iptvsimple::data::Channel& channel, const std::string& markerName);
+    static void ParseHttpHeaderIntoChannel(const std::string& line, iptvsimple::data::Channel& channel);
 
     std::string ParseIntoChannel(const std::string& line, iptvsimple::data::Channel& channel, data::MediaEntry& mediaEntry, int epgTimeShift, int catchupCorrectionSecs, bool xeevCatchup);
     void ParseAndAddChannelGroups(const std::string& groupNamesListString, std::vector<int>& groupIdList, bool isRadio);

@@ -198,6 +198,20 @@ void Channel::SetStreamURL(const std::string& url)
 
     TryToAddPropertyAsHeader("http-user-agent", "user-agent");
     TryToAddPropertyAsHeader("http-referrer", "referer"); // spelling differences are correct
+
+    for (auto it = m_properties.begin(); it != m_properties.end(); )
+    {
+      if (StringUtils::StartsWith(it->first, "header:"))
+      {
+        std::string headerName = it->first.substr(7);
+        m_streamURL = StreamUtils::AddHeaderToStreamUrl(m_streamURL, headerName, it->second);
+        it = m_properties.erase(it);
+      }
+      else
+      {
+        ++it;
+      }
+    }
   }
 
   if (m_settings->TransformMulticastStreamUrls() &&

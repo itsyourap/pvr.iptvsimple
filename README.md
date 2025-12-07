@@ -535,6 +535,9 @@ http://path-to-stream/live/channel-z.ts
 - `#WEBPROP`: Properties used for web scraping streams from HTML pages. Multiple can be passed each on a separate line.
   - `web-regex`: A regular expression pattern to extract the stream URL from the HTML content. The first capture group will be used as the stream URL. The URL must be captured within parentheses in the regex pattern, e.g. "([^"]+\.m3u8)".
   - `web-headers`: HTTP headers to be used when making the request to the web page. Format is `name1:value1&name2:value2`.
+- `#EXTHTTP`: A JSON object containing HTTP headers to be appended to the stream URL. Useful for passing cookies or user agents.
+  - Example: `#EXTHTTP:{"cookie":"name=value","User-Agent":"Mozilla/5.0"}`
+  - Note: For custom headers not supported by Kodi, prefix the header name with `!`.
 - `#EXT-X-PLAYLIST-TYPE`: If this element is present with a value of `VOD` (Video on Demand) the stream is marked as not being live.
 - `URL`: The final line in each channel stanza is the URL used for the stream. Appending `|user-agent=<agent-name>` will change the user agent. Other HTTP header fields can be set in the same fashion: `|name1=val1&name2=val2` etc. The header fields supported in this way by Kodi can be found [here](#http-header-fields-supported-by-kodi). If you want to pass custom headers that are not supported by Kodi you need to prefix them with an `!`, for example: : `|!name1=val1&!name2=val2`.
   - `@`: When a URL starts with '@' symbol (e.g. '@http://path-to-stream/live/channel-p.html'), it indicates that the URL points to a web page that contains the actual stream URL. The addon will attempt to extract the stream URL from this web page using either the provided `web-regex` pattern or default patterns. This is useful when the actual stream URL is embedded within a web page rather than being directly accessible.

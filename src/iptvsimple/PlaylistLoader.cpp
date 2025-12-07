@@ -205,6 +205,10 @@ bool PlaylistLoader::LoadPlayList()
     {
       ParseSinglePropertyIntoChannel(line, tmpChannel, WEBPROP_MARKER);
     }
+    else if (StringUtils::StartsWith(line, EXTHTTP_MARKER)) //#EXTHTTP:
+    {
+      ParseHttpHeaderIntoChannel(line, tmpChannel);
+    }
     else if (StringUtils::StartsWith(line, M3U_GROUP_MARKER)) //#EXTGRP:
     {
       //Clear any previous Group Ids
@@ -593,6 +597,58 @@ void PlaylistLoader::ParseSinglePropertyIntoChannel(const std::string& line, Cha
       channel.AddProperty(prop, propValue);
 
     Logger::Log(LEVEL_DEBUG, "%s - Found %s property: '%s' value: '%s' added: %s", __FUNCTION__, markerName.c_str(), prop.c_str(), propValue.c_str(), addProperty ? "true" : "false");
+  }
+}
+
+void PlaylistLoader::ParseHttpHeaderIntoChannel(const std::string& line, Channel& channel)
+{
+  std::string json = ReadMarkerValue(line, EXTHTTP_MARKER, false);
+
+  size_t pos = 0;
+  while (pos < json.length())
+  {
+    size_t keyStart = json.find('"', pos);
+    if (keyStart == std::string::npos) break;
+    keyStart++;
+
+    size_t keyEnd = json.find('"', keyStart);
+    if (keyEnd == std::string::npos) break;
+
+    std::string key = json.substr(keyStart, keyEnd - keyStart);
+
+    size_t colon = json.find(':', keyEnd);
+    if (colon == std::string::npos) break;
+
+    size_t valStart = json.find('"', colon);
+    if (valStart == std::string::npos) break;
+    valStart++;
+
+    size_t valEnd = valStart;
+    while (true)
+    {
+      valEnd = json.find('"', valEnd);
+      if (valEnd == std::string::npos) break;
+      if (json[valEnd - 1] != '\\') break;
+      valEnd++;
+    }
+    if (valEnd == std::string::npos) break;
+
+    std::string value = json.substr(valStart, valEnd - valStart);
+
+    /* Unescape \" to " and \\ to \ */
+    size_t found = value.find('\\');
+    while (found != std::string::npos && found + 1 < value.length())
+    {
+      if (value[found+1] == '"' || value[found+1] == '\\')
+      {
+        value.erase(found, 1);
+      }
+      found = value.find('\\', found + 1);
+    }
+
+    channel.AddProperty("header:" + key, value);
+
+    pos = valEnd + 1;
   }
 }
 
