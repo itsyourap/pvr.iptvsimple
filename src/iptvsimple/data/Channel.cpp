@@ -189,6 +189,23 @@ void Channel::SetIconPathFromTvgLogo(const std::string& tvgLogo, std::string& ch
 
 void Channel::SetStreamURL(const std::string& url)
 {
+  // Check for deprecated ClearKey properties
+  std::string licenseType = GetProperty("inputstream.adaptive.license_type");
+  if (licenseType.find("clearkey") != std::string::npos)
+  {
+    std::string licenseKey = GetProperty("inputstream.adaptive.license_key");
+    if (!licenseKey.empty())
+    {
+      if (StringUtils::StartsWith(licenseKey, "http") && licenseKey.find("|") == std::string::npos){
+        licenseKey += "|User-Agent=Dalvik/2.1.0%20(Linux;%20U;%20Android)";
+      }
+      AddProperty("inputstream.adaptive.drm_legacy", "org.w3.clearkey|" + licenseKey);
+      RemoveProperty("inputstream.adaptive.license_type");
+      RemoveProperty("inputstream.adaptive.license_key");
+      Logger::Log(LEVEL_DEBUG, "%s - Converted deprecated ClearKey properties to drm_legacy", __FUNCTION__);
+    }
+  }
+
   m_streamURL = url;
 
   if (StringUtils::StartsWith(url, HTTP_PREFIX) || StringUtils::StartsWith(url, HTTPS_PREFIX))
